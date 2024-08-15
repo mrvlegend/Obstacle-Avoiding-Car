@@ -1,0 +1,91 @@
+// Define motor pins
+#define MOTOR_A1 2  // Motor A IN1
+#define MOTOR_A2 3  // Motor A IN2
+#define MOTOR_B1 4  // Motor B IN3
+#define MOTOR_B2 5  // Motor B IN4
+
+// Define ultrasonic sensor pins
+#define TRIG_PIN 6  // Trigger pin
+#define ECHO_PIN 7  // Echo pin
+
+// Define distance threshold to avoid obstacles (in cm)
+#define DISTANCE_THRESHOLD 15
+
+void setup() {
+    // Initialize motor pins as outputs
+    pinMode(MOTOR_A1, OUTPUT);
+    pinMode(MOTOR_A2, OUTPUT);
+    pinMode(MOTOR_B1, OUTPUT);
+    pinMode(MOTOR_B2, OUTPUT);
+
+    // Initialize ultrasonic sensor pins
+    pinMode(TRIG_PIN, OUTPUT);
+    pinMode(ECHO_PIN, INPUT);
+
+    // Start serial communication for debugging
+    Serial.begin(9600);
+}
+
+void loop() {
+    long duration;
+    int distance;
+
+    // Send a pulse to the ultrasonic sensor
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG_PIN, LOW);
+
+    // Read the pulse duration from the sensor
+    duration = pulseIn(ECHO_PIN, HIGH);
+
+    // Calculate the distance based on the pulse duration
+    distance = duration * 0.0344 / 2;  // Convert to centimeters
+
+    // Debugging: print the distance to the Serial Monitor
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+
+    // Check if the distance is below the threshold
+    if (distance < DISTANCE_THRESHOLD) {
+        // If an obstacle is detected, stop the motors
+        stopMotors();
+        delay(500);  // Wait for half a second
+
+        // Turn the car to avoid the obstacle
+        turnRight();
+        delay(1000);  // Turn right for 1 second
+
+        // Move forward again
+        moveForward();
+        delay(1000);  // Move forward for 1 second
+    } else {
+        // If no obstacle is detected, move forward
+        moveForward();
+    }
+}
+
+// Function to move forward
+void moveForward() {
+    digitalWrite(MOTOR_A1, HIGH);
+    digitalWrite(MOTOR_A2, LOW);
+    digitalWrite(MOTOR_B1, HIGH);
+    digitalWrite(MOTOR_B2, LOW);
+}
+/? Function to turn right
+void turnRight() {
+    digitalWrite(MOTOR_A1, HIGH);
+    digitalWrite(MOTOR_A2, LOW);
+    digitalWrite(MOTOR_B1, LOW);
+    digitalWrite(MOTOR_B2, LOW);
+}
+
+// Function to stop the motors
+void stopMotors() {
+    digitalWrite(MOTOR_A1, LOW);
+    digitalWrite(MOTOR_A2, LOW);
+    digitalWrite(MOTOR_B1, LOW);
+    digitalWrite(MOTOR_B2, LOW);
+}
